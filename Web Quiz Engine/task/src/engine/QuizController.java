@@ -2,9 +2,12 @@ package engine;
 
 import io.micrometer.core.instrument.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashSet;
 import java.util.List;
 
 
@@ -61,9 +64,13 @@ public class QuizController {
 
     @PostMapping(value = "/api/quizzes", consumes = "application/json")
     public QuizStorageConfirmation postQuiz(@RequestBody Quiz quiz) {
-        var storageAnsewer = quizStorage.insert(quiz);
+        var storageAnswer = quizStorage.insert(quiz);
 
-        return storageAnsewer;
+        if (storageAnswer == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid test data");
+        }
+
+        return storageAnswer;
     }
 
     @RequestMapping(value="/api/quizzes/{idStr}", method=RequestMethod.GET)
@@ -82,20 +89,37 @@ public class QuizController {
         return quizStorage.getAll();
     }
 
+
+    boolean answersAreTheSame(List<Integer> firstArr, List<Integer> secondArr) {
+
+        var secondSet = new HashSet<Integer>();
+        for (var x : secondArr) secondSet.add(x);
+
+        boolean res = true;
+
+        for (var x : firstArr) {
+            if (!secondSet.contains(x))
+                res = false;
+        }
+
+        return res;
+    }
+
     @RequestMapping(value = {"/api/quizzes/{idStr}/solve"}, method=RequestMethod.POST)
-    public QuizResponse answerQuizPart2(@RequestParam(value = "answer", defaultValue = "0") String answer,
+    public QuizResponse answerQuizPart2(@RequestBody QuizAnswerQuery answer,
                                         @PathVariable String idStr) {
 
-       Integer answerInt = Integer.parseInt(answer);
+       List<Integer> answerInt = answer.getAnswer();
        Integer idInt = Integer.parseInt(idStr);
 
-       Integer correctAnswer = quizStorage.getAnswer(idInt);
+        List<Integer> correctAnswer = quizStorage.getAnswer(idInt);
 
        if (correctAnswer == null) {
            throw new QuizNotFound();
        }
 
-        if (answerInt == correctAnswer) { // ok
+        if (answersAreTheSame(answerInt, correctAnswer)
+                && answersAreTheSame(correctAnswer, answerInt)) { // ok
             return new QuizResponse(true, "Congratulations, you're right!");
         }
         else { // wrong answer

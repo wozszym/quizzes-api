@@ -9,7 +9,7 @@ public class Quiz {
     private String title;
     private String text;
     private List<String> options;
-    private int answer;
+    private List<Integer> answer;
 
     // public Quiz(String title, String text, List<String> options, int answer) {
     public Quiz() {
@@ -17,10 +17,10 @@ public class Quiz {
         // this.text = text;
         // this.options = options;
 
-        this.title = "The Java Logo";
-        this.text = "What is depicted on the Java logo?";
-        this.options = new ArrayList<>(Arrays.asList("Robot","Tea leaf","Cup of coffee","Bug"));
-        this.answer = 2;
+        this.title = "";
+        this.text = "";
+        this.options = new ArrayList<>();
+        this.answer = new ArrayList<>();
     }
 
     public String getTitle() {
@@ -35,11 +35,11 @@ public class Quiz {
         return options;
     }
 
-    public int getAnswer() {
+    public List<Integer> getAnswer() {
         return answer;
     }
 
-    public void setAnswer(int answer) {
+    public void setAnswer(List<Integer> answer) {
         this.answer = answer;
     }
 
@@ -53,5 +53,9 @@ public class Quiz {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public boolean isValid() {
+        return !title.isEmpty() && !text.isEmpty() && options.size() >= 2;
     }
 }

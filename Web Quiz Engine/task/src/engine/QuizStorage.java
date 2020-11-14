@@ -13,8 +13,13 @@ public class QuizStorage {
     private Integer nextId = 0;
 
     public QuizStorageConfirmation insert(Quiz quiz) {
-        quizMap.put(nextId, quiz);
-        return new QuizStorageConfirmation(quiz.getTitle(), quiz.getText(), quiz.getOptions(), nextId++);
+
+        if (quiz.isValid()) {
+            quizMap.put(nextId, quiz);
+            return new QuizStorageConfirmation(quiz.getTitle(), quiz.getText(), quiz.getOptions(), nextId++);
+        }
+
+        return null;
     }
 
     public QuizNoAnswer get(Integer id) {
@@ -36,7 +41,7 @@ public class QuizStorage {
         return result;
     }
 
-    public Integer getAnswer(Integer id) {
+    public List<Integer> getAnswer(Integer id) {
         if (quizMap.containsKey(id)) {
             return quizMap.get(id).getAnswer();
         }
