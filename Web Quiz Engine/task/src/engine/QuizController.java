@@ -64,17 +64,25 @@ public class QuizController {
 
     @PostMapping(value = "/api/quizzes", consumes = "application/json")
     public QuizStorageConfirmation postQuiz(@RequestBody Quiz quiz) {
+
+        System.out.println("postQuiz ");
+
         var storageAnswer = quizStorage.insert(quiz);
 
         if (storageAnswer == null) {
+            System.out.println("throwing ");
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid test data");
         }
+
+        System.out.println("new quiz getting id = " + storageAnswer.getId());
 
         return storageAnswer;
     }
 
     @RequestMapping(value="/api/quizzes/{idStr}", method=RequestMethod.GET)
     public QuizNoAnswer getQuizById(@PathVariable String idStr) {
+
+        System.out.println("getQuizById " + idStr);
         Integer id = Integer.parseInt(idStr);
         QuizNoAnswer response = quizStorage.get(id);
 
@@ -86,6 +94,7 @@ public class QuizController {
 
     @RequestMapping(value="/api/quizzes", method=RequestMethod.GET)
     public List<QuizNoAnswer> getAllQuizes() {
+        System.out.println("getAllQuizes");
         return quizStorage.getAll();
     }
 
@@ -108,6 +117,7 @@ public class QuizController {
     @RequestMapping(value = {"/api/quizzes/{idStr}/solve"}, method=RequestMethod.POST)
     public QuizResponse answerQuizPart2(@RequestBody QuizAnswerQuery answer,
                                         @PathVariable String idStr) {
+       System.out.println("answerQuizPart2 id = " + idStr);
 
        List<Integer> answerInt = answer.getAnswer();
        Integer idInt = Integer.parseInt(idStr);

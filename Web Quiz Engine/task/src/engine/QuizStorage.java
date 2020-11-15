@@ -1,6 +1,8 @@
 package engine;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,13 +11,31 @@ import java.util.Map;
 @Component
 public class QuizStorage {
 
+    // @Autowired annotation provides the automatic dependency injection.
+    @Autowired
+    QuizDBService quizDBService;
+
     private Map<Integer, Quiz> quizMap = new HashMap<>();
     private Integer nextId = 0;
+
+    @PostConstruct
+    private void _init() {
+        List<Quiz> fromDb = quizDBService.getAll();
+
+        for (Quiz q : fromDb) {
+            quizMap.put(q.getId(), q);
+        }
+
+        nextId = fromDb.size();
+    }
 
     public QuizStorageConfirmation insert(Quiz quiz) {
 
         if (quiz.isValid()) {
+            quiz.setId(nextId); // new line
             quizMap.put(nextId, quiz);
+            quizDBService.save(quiz); // save to DB
+
             return new QuizStorageConfirmation(quiz.getTitle(), quiz.getText(), quiz.getOptions(), nextId++);
         }
 
